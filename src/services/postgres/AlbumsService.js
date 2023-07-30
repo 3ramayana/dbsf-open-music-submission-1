@@ -33,6 +33,10 @@ class AlbumsService {
     const albumResult = await this._pool.query(queryGetAlbum);
     const songsResult = await this._pool.query(queryGetSongs);
 
+    if (!albumResult.rows.length) {
+      throw new NotFoundError('Album tidak ditemukan', 404);
+    }
+
     const album = albumResult.rows[0];
     const result = {
       id: album.id,
@@ -40,10 +44,6 @@ class AlbumsService {
       year: album.year,
       songs: songsResult.rows,
     };
-
-    if (!albumResult.rows.length) {
-      throw new NotFoundError('Album tidak ditemukan', 404);
-    }
 
     return result;
   }
