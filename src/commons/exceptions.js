@@ -13,16 +13,11 @@ class NotFoundError extends ClientError {
   }
 }
 
-/**
- * 5. @TODO
- *
- * Buatlah kelas InvariantError yang merupakan turunan dari ClientError.
- * Dengan spesifikasi:
- * - Memiliki status code 400
- * - Memiliki nama InvariantError
- *
- * referensi: https://www.dicoding.com/academies/271/tutorials/14477
- *
- */
+class InvariantError extends ClientError {
+  constructor(message) {
+    super(message);
+    this.name = 'InvariantError';
+  }
+}
 
 module.exports = { ClientError, NotFoundError, InvariantError };

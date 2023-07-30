@@ -1,14 +1,19 @@
 const { nanoid } = require('nanoid');
-const { pool } = require('./pool');
+const { Pool } = require('pg');
 const { NotFoundError } = require('../../commons/exceptions');
 
 class SongsService {
   constructor() {
-    this._pool = pool;
+    this._pool = new Pool();
   }
 
   async persistSongs({
-    title, year, genre, performer, duration = null, albumId = null,
+    title,
+    year,
+    genre,
+    performer,
+    duration = null,
+    albumId = null,
   }) {
     const id = `songs-${nanoid(16)}`;
     const query = {
@@ -21,8 +26,31 @@ class SongsService {
     return id;
   }
 
-  async getSongs() {
-    const query = 'SELECT id, title, performer FROM songs';
+  async getSongs(title, performer) {
+    let text = 'SELECT id, title, performer FROM songs';
+    // eslint-disable-next-line prefer-const
+    let values = [];
+
+    if (title) {
+      text += " WHERE title ILIKE '%' || $1 || '%'";
+      values.push(title);
+    }
+
+    if (!title && performer) {
+      text += " WHERE performer ILIKE '%' || $1 || '%'";
+      values.push(performer);
+    }
+
+    if (title && performer) {
+      text += " AND performer ILIKE '%' || $2 || '%'";
+      values.push(performer);
+    }
+
+    const query = {
+      text,
+      values,
+    };
+
     const { rows } = await this._pool.query(query);
     return rows;
   }
@@ -49,9 +77,10 @@ class SongsService {
     return song;
   }
 
-  async editSongById(id, {
-    title, year, genre, performer, duration = null, albumId = null,
-  }) {
+  async editSongById(
+    id,
+    { title, year, genre, performer, duration = null, albumId = null }
+  ) {
     const query = {
       text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7 RETURNING id',
       values: [title, year, genre, performer, duration, albumId, id],
@@ -73,11 +102,7 @@ class SongsService {
     const { rows } = await this._pool.query(query);
 
     if (!rows.length > 0) {
-
-      /**
-       * 6. @TODO
-       * `throw` error instance dari NotFoundError dengan pesan 'songs is not found'
-       */
+      throw new NotFoundError('songs is not found');
     }
   }
 }

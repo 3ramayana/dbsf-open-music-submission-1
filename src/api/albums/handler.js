@@ -2,10 +2,17 @@ class AlbumsHandler {
   constructor(validator, service) {
     this._validator = validator;
     this._service = service;
+
+    this.postAlbumHandler = this.postAlbumHandler.bind(this);
+    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
+    this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
+    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
   }
 
   async postAlbumHandler(request, h) {
-    const { name, year } = this._validator.validatePostAlbumPayload(request.payload);
+    const { name, year } = this._validator.validatePostAlbumPayload(
+      request.payload
+    );
     const albumId = await this._service.persistAlbum({ name, year });
 
     const response = h.response({
@@ -33,7 +40,9 @@ class AlbumsHandler {
 
   async putAlbumByIdHandler(request) {
     const { id } = request.params;
-    const { name, year } = this._validator.validatePutAlbumPayload(request.payload);
+    const { name, year } = this._validator.validatePutAlbumPayload(
+      request.payload
+    );
 
     await this._service.editAlbumById(id, { name, year });
 

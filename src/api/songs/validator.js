@@ -12,13 +12,7 @@ const SongsValidator = {
       albumId: Joi.string(),
     });
 
-    /**
-     * 4. @TODO
-     * Buat varibel `result` yang merupakan hasil
-     * dari validasi dengan perintah `scheme.validate(payload)`.
-     *
-     * referensi: https://www.dicoding.com/academies/271/tutorials/14467
-     */
+    const result = scheme.validate(payload);
 
     if (result.error) {
       throw new InvariantError(result.error.message);

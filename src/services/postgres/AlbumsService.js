@@ -1,22 +1,18 @@
 const { nanoid } = require('nanoid');
-const { pool } = require('./pool');
+const { Pool } = require('pg');
 const { NotFoundError } = require('../../commons/exceptions');
 
 class AlbumsService {
   constructor() {
-    this._pool = pool;
+    this._pool = new Pool();
   }
 
   async persistAlbum({ name, year }) {
     const id = `albums-${nanoid(16)}`;
-
-    /**
-     * 6. @TODO
-     * Buatlah variabel query sebagai postgres query untuk menyimpan album ke database
-     * dengan menggunakan method `this._pool.query()`
-     *
-     * referensi: https://www.dicoding.com/academies/271/tutorials/17476
-     */
+    const query = {
+      text: 'INSERT INTO albums VALUES($1, $2, $3)',
+      values: [id, name, year],
+    };
 
     await this._pool.query(query);
 
@@ -24,18 +20,32 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
-    const query = {
-      text: 'SELECT id, name, year FROM albums WHERE id = $1',
+    const queryGetAlbum = {
+      text: 'SELECT * FROM albums WHERE id = $1',
       values: [id],
     };
 
-    const { rows } = await this._pool.query(query);
+    const queryGetSongs = {
+      text: 'SELECT * FROM songs WHERE album_id = $1',
+      values: [id],
+    };
 
-    if (!rows.length) {
+    const albumResult = await this._pool.query(queryGetAlbum);
+    const songsResult = await this._pool.query(queryGetSongs);
+
+    const album = albumResult.rows[0];
+    const result = {
+      id: album.id,
+      name: album.name,
+      year: album.year,
+      songs: songsResult.rows,
+    };
+
+    if (!albumResult.rows.length) {
       throw new NotFoundError('Album tidak ditemukan', 404);
     }
 
-    return rows[0];
+    return result;
   }
 
   async editAlbumById(id, { name, year }) {

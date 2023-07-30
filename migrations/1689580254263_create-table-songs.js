@@ -31,12 +31,6 @@ exports.up = (pgm) => {
   });
 };
 
-// eslint-disable-next-line no-unused-vars
 exports.down = (pgm) => {
-  /**
-   * 2. @TODO
-   * hapuslah tabel songs dengan perintah pgm.dropTable()
-   *
-   * Catatan: referensi modul Dicoding: https://www.dicoding.com/academies/271/tutorials/17468
-   */
+  pgm.dropTable('songs');
 };

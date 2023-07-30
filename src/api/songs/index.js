@@ -6,13 +6,7 @@ const songs = {
   name: 'songs',
   register: async (server, { songsService }) => {
     const handler = new SongsHandler(SongsValidator, songsService);
-
-    /**
-     * 3. @TODO
-     * Daftarkan `routes(handler)` ke server melalui `server.route()`
-     *
-     * referensi: https://www.dicoding.com/academies/271/tutorials/14432
-     */
+    server.route(routes(handler));
   },
 };
 

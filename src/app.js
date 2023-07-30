@@ -36,11 +36,29 @@ async function createServer() {
   server.ext('onPreResponse', (request, h) => {
     const { response } = request;
 
-    if (response instanceof ClientError) {
-      return h.response({
-        status: 'fail',
-        message: response.message,
-      }).code(response.statusCode);
+    if (response instanceof Error) {
+      // penanganan client error secara internal.
+      if (response instanceof ClientError) {
+        return h
+          .response({
+            status: 'fail',
+            message: response.message,
+          })
+          .code(response.statusCode);
+      }
+
+      // mempertahankan penanganan client error oleh hapi secara native, seperti 404, etc.
+      if (!response.isServer) {
+        return h.continue;
+      }
+
+      // penanganan server error sesuai kebutuhan
+      const newResponse = h.response({
+        status: 'error',
+        message: 'terjadi kegagalan pada server kami',
+      });
+      newResponse.code(500);
+      return newResponse;
     }
 
     return h.continue;
